@@ -1,0 +1,10 @@
+YEPfinir les constructeurs de Dummy,
+
+implémenter une gestion des évènements statiques dans Widget
+scinder la class InputValue et rendre ses enfants fonctionnels (une pour le texte, une pour les valeurs entières, une pour les valeurs flotantes)
+rendre la classe Slider fonctionnelle
+retirer la totalité des sf::RectangleShape encore présents, et les remplacer par des Dummy
+ajouter un Dummy et de possible Slider à la classe Container
+ajouter une classe de liste déroulante
+rendre la classe Container visible, si désiré. Le cas échéant, mettre en place un système de Sliders pour naviguer à l'intérieur
+ajouter la possibilité et un automatisme pour supprimer des textures/polices inutilisées
