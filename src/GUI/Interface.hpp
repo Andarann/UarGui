@@ -41,8 +41,6 @@ Regarding updating :
 
 */
 
-class System;
-
 //We will set a basic GUI system relying on SFML, based on flexibility (read : mod-ability), and easiness to use
 //All the system will be based on a big inheritance system from this class (widget) to create the whole system
 
@@ -63,7 +61,7 @@ public:
     void setResizable(bool isResizable);
     void setID(ID_TYPE newID);
 
-    void updateClick(sf::RenderWindow& window, sf::FloatRect* widgetShape, System* systemContainer);
+    void updateClick(sf::RenderWindow& window, sf::FloatRect* widgetShape);
 
     static ID_TYPE giveTextureID(std::string texturePath);//Simply gives the pointer if there's one, otherwise loads then give. One file path = one texture, two same textures with different path will occupy two spaces
     static ID_TYPE giveFontID(std::string fontPath);//Same
@@ -73,10 +71,19 @@ public:
     static sf::Font* giveFontPointerOfID(ID_TYPE fontID);
 
     static bool Init(sf::Window const& mainWindow);
-    static bool UpdateEvents(sf::Window const& mainWindow);
-    static bool isKeyPressed(sf::Keyboard::Key keyCheck);
+    static void UpdateEvents(sf::Window const& mainWindow);
+    static bool isKeyPressed(sf::Window const& mainWindow, sf::Keyboard::Key keyCheck);
+    static bool isKeyPushed(sf::Window const& mainWindow, sf::Keyboard::Key keyCheck);
+    static bool isKeyMaintained(sf::Window const& mainWindow, sf::Keyboard::Key keyCheck);
+    static bool isButtonPressed(sf::Window const& mainWindow, sf::Mouse::Button buttonCheck);
+    static bool isButtonClicked(sf::Window const& mainWindow, sf::Mouse::Button buttonCheck);
+    static bool isButtonMaintained(sf::Window const& mainWindow, sf::Mouse::Button buttonCheck);
+    static void ignoreButtonClick(sf::Window const& mainWindow, sf::Mouse::Button toIgnore);
+    static void ignoreButtonMaintained(sf::Window const& mainWindow, sf::Mouse::Button toIgnore);
 
-    virtual void update(sf::RenderWindow& window, System* systemContainer);
+    static bool isWidgetContainer(Widget* toCheck);
+
+    virtual void update(sf::RenderWindow& window);
     virtual void draw(sf::RenderWindow& window) const;
 protected:
 
@@ -136,7 +143,7 @@ public:
     sf::FloatRect getLocalBounds() const;
     sf::FloatRect getGlobalBounds() const;
 
-    virtual void update(sf::RenderWindow& window, System* systemContainer);
+    virtual void update(sf::RenderWindow& window);
     virtual void draw(sf::RenderWindow& window) const;
 private:
     double posX, posY;
@@ -149,7 +156,7 @@ private:
 class Button : public Widget{//Ok
 public:
     Button();
-    Button(sf::Vector2f pos, sf::Color buttonColoration, std::string buttonContent, short fontSize, sf::Vector2f textPosPercent, short distTextBoundaries);
+    Button(sf::Vector2f pos, sf::Color buttonColoration, std::string buttonContent, short fontSize = 0, sf::Vector2f textPosPercent = sf::Vector2f(0,0), short distTextBoundaries = 0);
     ~Button();
 
     void setString(std::string stringToPut);
@@ -160,7 +167,7 @@ public:
 
     bool isPressed() const {return (clicked || clickMaintained);};
 
-    virtual void update(sf::RenderWindow& window, System* systemContainer);
+    virtual void update(sf::RenderWindow& window);
     virtual void draw(sf::RenderWindow& window) const;
 private:
     sf::Vector2f textPos;//(0.5;0.5) would indicate middle, (1;0) top left etc.
@@ -179,7 +186,7 @@ public:
 
     bool getValue() const;
 
-    virtual void update(sf::RenderWindow& window, System* systemContainer);
+    virtual void update(sf::RenderWindow& window);
     virtual void draw(sf::RenderWindow& window) const;
 private:
     bool value;
@@ -194,7 +201,7 @@ public:
     Slider();
     ~Slider();
 
-    virtual void update(sf::RenderWindow& window, System* systemContainer);
+    virtual void update(sf::RenderWindow& window);
     virtual void draw(sf::RenderWindow& window) const;
 private:
     float vMin, vMax;//Boundaries
@@ -223,7 +230,7 @@ public:
 
     //Those functions are exactly the same as in system, because it is itself considered to be a container ;)
     template<class T>
-Widget* Container::addWidget(T toAdd, std::string name)
+T* Container::addWidget(T toAdd, std::string name)
 {
     auto findWidget = stringToIDTable.find(name);
 
@@ -253,7 +260,7 @@ Widget* Container::addWidget(T toAdd, std::string name)
     Widget* giveWidgetPointer(std::string widgetName) const;//Matches the name and the ID, to then get pointer from ID
     Widget* returnWidgetPointerOfID(ID_TYPE ID) const;//Not meant to be used directly. Matches ID and Widget*
 
-    virtual void update(sf::RenderWindow& window, System* systemContainer);
+    virtual void update(sf::RenderWindow& window);
     virtual void draw(sf::RenderWindow& window) const;
 private:
     static bool memberInteracted;
@@ -283,7 +290,7 @@ public:
     T returnValue() const;
     void changeValue(T toPut);
 
-    virtual void update(sf::RenderWindow& window, System* systemContainer);
+    virtual void update(sf::RenderWindow& window);
     virtual void draw(sf::RenderWindow& window) const;
 private:
     bool limits;
@@ -293,7 +300,7 @@ private:
     sf::Text contentText;
 };
 
-void updateWidgetDirection(Widget& toUpdate, sf::RenderWindow& window, System* mainSystem);
+void updateWidgetDirection(Widget& toUpdate, sf::RenderWindow& window);
 void renderWidgetDirection(Widget& toRender, sf::RenderWindow& window);
 
 #include "Classes.h"

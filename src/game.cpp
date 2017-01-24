@@ -14,6 +14,7 @@ void gameLoop()
     System mainSystem;
 
     Entity temp;
+    Widget::Init(*mainSystem.returnRenderWindowPointer());
 
     for (int i(0); i < 20 ; i++)
     {
@@ -23,7 +24,7 @@ void gameLoop()
 
     sf::Color myColor(255,0,0);
 
-    //mainSystem.addWidget(Dummy(myColor, sf::Vector2f(50,50), sf::Vector2f(10,10)), "test");
+    mainSystem.addWidget(Button(sf::Vector2f(5,5), sf::Color(25,43,54), "", 20, sf::Vector2f(0,0), 20), "me");
     //mainSystem.addWidget(Dummy(myColor, sf::Vector2f(50,50), sf::Vector2f(10,10)), "test1");
     //mainSystem.addWidget(Dummy(myColor, sf::Vector2f(50,50), sf::Vector2f(10,10)), "test2");
 
@@ -62,7 +63,9 @@ void System::Update()
     updateKeyboardButton();
     manageWindowEvent(event, windowMain, FPS);
 
-    //updateWidgets();
+    Widget::UpdateEvents(windowMain);
+
+    updateWidgets();
     ImGui::SFML::Update(windowMain, imGuiClock.restart());
     Human::Update(allHumans, windowMain, *this);
 
@@ -487,6 +490,7 @@ void System::updateMouseButton()
             {
                 mouseButtonClick[i] = false;
                 mouseButtonsMaintained[i] = true;
+                ignoreMouseMaintained[i] = false;
             }
         }
         else if (mouseButtonClick[i] || mouseButtonsMaintained[i])//Release the button
@@ -494,6 +498,8 @@ void System::updateMouseButton()
             //std::cout << "Released button number : "<< i <<'\n';
             mouseButtonClick[i] = false;
             mouseButtonsMaintained[i] = false;
+            ignoreMouseClick[i] = false;
+            ignoreMouseMaintained[i] = false;
         }
     }
 }
@@ -788,7 +794,7 @@ Widget* System::giveWidgetPointer(std::string widgetName) const
 
 void System::updateWidgets()
 {
-    updateWidgetDirection(primaryContainer, windowMain, this);
+    updateWidgetDirection(primaryContainer, windowMain);
 }
 
 void System::renderWidgets()

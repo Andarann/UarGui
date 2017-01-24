@@ -48,7 +48,7 @@ bool Widget::isClicked() const
     return clicked;
 }
 
-void Widget::update(sf::RenderWindow& window, System* systemContainer)
+void Widget::update(sf::RenderWindow& window)
 {
     //Nothing since you're not supposed to use a the Widget class directly
 }
@@ -80,27 +80,27 @@ void Widget::setResizable(bool isResizable)
     resizable = isResizable;
 }
 
-void Widget::updateClick(sf::RenderWindow& window, sf::FloatRect* widgetShape, System* systemContainer)
+void Widget::updateClick(sf::RenderWindow& window, sf::FloatRect* widgetShape)
 {
     bool widgetHovered = isHovered(window, widgetShape);
 
     if (widgetHovered &&
-        systemContainer->checkMouseButtonClicked(sf::Mouse::Left) &&
+        Widget::isButtonClicked(window, sf::Mouse::Left) &&
         (!clicked))
     {
-        systemContainer->nullifyClick(sf::Mouse::Left);
+        Widget::ignoreButtonClick(window, sf::Mouse::Left);
         clicked = true;
     }
     else if (widgetHovered &&
-             systemContainer->checkMouseButtonMaintained(sf::Mouse::Left) &&
+             Widget::isButtonMaintained(window, sf::Mouse::Left) &&
              clicked)
     {
         clicked = false;
         clickMaintained = true;
     }
     else if (!widgetHovered ||
-             (!systemContainer->checkMouseButtonMaintained(sf::Mouse::Left) &&
-              !systemContainer->checkMouseButtonClicked(sf::Mouse::Left)))
+             (!Widget::isButtonMaintained(window, sf::Mouse::Left) &&
+              !Widget::isButtonClicked(window, sf::Mouse::Left)))
     {
         clicked = false;
         clickMaintained = false;
@@ -112,7 +112,7 @@ void Widget::setID(ID_TYPE newID)
     ID = newID;
 }
 
-static ID_TYPE Widget::giveTextureID(std::string texturePath)
+ID_TYPE Widget::giveTextureID(std::string texturePath)
 {
     if (Widget::stringToIDTableTexture.find(texturePath) == Widget::stringToIDTableTexture.end())
     {
@@ -145,7 +145,7 @@ static ID_TYPE Widget::giveTextureID(std::string texturePath)
     return Widget::stringToIDTableTexture.find(texturePath)->second;//Yummy yummy syntax
 }
 
-static ID_TYPE Widget::giveFontID(std::string fontPath)
+ID_TYPE Widget::giveFontID(std::string fontPath)
 {
     if (Widget::stringToIDTableFont.find(fontPath) == Widget::stringToIDTableFont.end())
     {
@@ -178,7 +178,7 @@ static ID_TYPE Widget::giveFontID(std::string fontPath)
     return Widget::stringToIDTableFont.find(fontPath)->second;
 }
 
-static sf::Texture* Widget::giveTexturePointerOfID(ID_TYPE textureID)
+sf::Texture* Widget::giveTexturePointerOfID(ID_TYPE textureID)
 {
     if (Widget::widgetTextures.find(textureID) == Widget::widgetTextures.end())
         std::cout << "Error : There is no texture of ID " << textureID << " stored\n";
@@ -186,7 +186,7 @@ static sf::Texture* Widget::giveTexturePointerOfID(ID_TYPE textureID)
         return Widget::widgetTextures.find(textureID)->second.get();
 }
 
-static sf::Font* Widget::giveFontPointerOfID(ID_TYPE fontID)
+sf::Font* Widget::giveFontPointerOfID(ID_TYPE fontID)
 {
     if (Widget::widgetFonts.find(fontID) == Widget::widgetFonts.end())
         std::cout << "Error : There is no font of ID " << fontID << " stored\n";
@@ -194,17 +194,17 @@ static sf::Font* Widget::giveFontPointerOfID(ID_TYPE fontID)
         return Widget::widgetFonts.find(fontID)->second.get();
 }
 
-static void Widget::removeTexture(ID_TYPE textureID)
+void Widget::removeTexture(ID_TYPE textureID)
 {
 
 }
 
-static void Widget::removeFont(ID_TYPE fontID)
+void Widget::removeFont(ID_TYPE fontID)
 {
 
 }
 
-static bool Widget::Init(sf::Window const& mainWindow)
+bool Widget::Init(sf::Window const& mainWindow)
 {
     for (int i(0) ; i < sf::Mouse::ButtonCount ; i++)
     {
@@ -221,58 +221,126 @@ static bool Widget::Init(sf::Window const& mainWindow)
     }
 }
 
-static bool Widget::UpdateEvents(sf::Window const& mainWindow)
+void Widget::UpdateEvents(sf::Window const& mainWindow)
 {
-    for (int i(0); i<sf::Keyboard::KeyCount ; i++)
+    if (mainWindow.hasFocus())//In case there are multiple windows, we ensure that we only update events in the right window
     {
-        if (sf::Keyboard::isKeyPressed(i))//If the button is pressed...
+        for (int i(0); i<sf::Keyboard::KeyCount ; i++)
         {
-            if (Widget::keyboardButtonPushed[i] == false && Widget::keyboardButtonsMaintained[i] == false)//We first for once set it on clicked...
+            if (sf::Keyboard::isKeyPressed(i))//If the button is pressed...
             {
-                //std::cout << "Pushed key number : "<< i <<'\n';
-                Widget::keyboardButtonPushed[i] = true;
+                if (Widget::keyboardButtonPushed[i] == false && Widget::keyboardButtonsMaintained[i] == false)//We first for once set it on clicked...
+                {
+                    //std::cout << "Pushed key number : "<< i <<'\n';
+                    Widget::keyboardButtonPushed[i] = true;
+                }
+                else if (Widget::keyboardButtonPushed[i] == true && Widget::keyboardButtonsMaintained[i] == false)//Then block it on maintained
+                {
+                    Widget::keyboardButtonPushed[i] = false;
+                    Widget::keyboardButtonsMaintained[i] = true;
+                }
             }
-            else if (Widget::keyboardButtonPushed[i] == true && Widget::keyboardButtonsMaintained[i] == false)//Then block it on maintained
+            else if (Widget::keyboardButtonPushed[i] || Widget::keyboardButtonsMaintained[i])//Release the button
             {
+                //std::cout << "Released key number : "<< i <<'\n';
                 Widget::keyboardButtonPushed[i] = false;
-                Widget::keyboardButtonsMaintained[i] = true;
+                Widget::keyboardButtonsMaintained[i] = false;
             }
         }
-        else if (Widget::keyboardButtonPushed[i] || Widget::keyboardButtonsMaintained[i])//Release the button
-        {
-            //std::cout << "Released key number : "<< i <<'\n';
-            Widget::keyboardButtonPushed[i] = false;
-            Widget::keyboardButtonsMaintained[i] = false;
-        }
-    }
 
-    for (int i(0);i<sf::Mouse::ButtonCount;i++)
-    {
-        if (sf::Mouse::isButtonPressed(i))//If the button is pressed...
+        for (int i(0);i<sf::Mouse::ButtonCount;i++)
         {
-            if (Widget::mouseButtonClick[i] == false && Widget::mouseButtonsMaintained[i] == false)//We first for once set it on clicked...
+            if (sf::Mouse::isButtonPressed(i))//If the button is pressed...
             {
-                Widget::mouseButtonClick[i] = true;
-                Widget::ignoreMouseClick[i] = false;
+                if (Widget::mouseButtonClick[i] == false && Widget::mouseButtonsMaintained[i] == false)//We first for once set it on clicked...
+                {
+                    Widget::mouseButtonClick[i] = true;
+                    Widget::ignoreMouseClick[i] = false;
+                }
+                else if (Widget::mouseButtonClick[i] == true && Widget::mouseButtonsMaintained[i] == false)//Then block it on maintained
+                {
+                    Widget::mouseButtonClick[i] = false;
+                    Widget::mouseButtonsMaintained[i] = true;
+                    Widget::ignoreMouseMaintained[i] = false;
+                }
             }
-            else if (Widget::mouseButtonClick[i] == true && Widget::mouseButtonsMaintained[i] == false)//Then block it on maintained
+            else if (Widget::mouseButtonClick[i] || Widget::mouseButtonsMaintained[i])//Release the button
             {
+                //std::cout << "Released button number : "<< i <<'\n';
                 Widget::mouseButtonClick[i] = false;
-                Widget::mouseButtonsMaintained[i] = true;
+                Widget::mouseButtonsMaintained[i] = false;
+                Widget::ignoreMouseClick[i] = false;
+                Widget::ignoreMouseMaintained[i] = false;
             }
-        }
-        else if (Widget::mouseButtonClick[i] || Widget::mouseButtonsMaintained[i])//Release the button
-        {
-            //std::cout << "Released button number : "<< i <<'\n';
-            Widget::mouseButtonClick[i] = false;
-            Widget::mouseButtonsMaintained[i] = false;
         }
     }
 }
 
-static bool Widget::isKeyPressed(sf::Keyboard::Key keyCheck)
+bool Widget::isKeyPressed(sf::Window const& mainWindow, sf::Keyboard::Key keyCheck)
 {
-    return (Widget::keyboardButtonPushed[keyCheck] || Widget::keyboardButtonsMaintained[keyCheck]);
+    if (mainWindow.hasFocus())
+        return (Widget::keyboardButtonsMaintained[keyCheck] || Widget::keyboardButtonPushed[keyCheck]);
+    else
+        return false;//No interaction
+}
+
+bool Widget::isKeyPushed(sf::Window const& mainWindow, sf::Keyboard::Key keyCheck)
+{
+    if (mainWindow.hasFocus())
+        return (Widget::keyboardButtonPushed[keyCheck]);
+    else
+        return false;//No interaction
+}
+
+bool Widget::isKeyMaintained(sf::Window const& mainWindow, sf::Keyboard::Key keyCheck)
+{
+    if (mainWindow.hasFocus())
+        return (Widget::keyboardButtonsMaintained[keyCheck]);
+    else
+        return false;//No interaction
+}
+
+bool Widget::isButtonPressed(sf::Window const& mainWindow, sf::Mouse::Button buttonCheck)
+{
+    if (mainWindow.hasFocus())
+        return ((Widget::mouseButtonsMaintained[buttonCheck] && !Widget::ignoreMouseMaintained[buttonCheck]) ||
+                (Widget::mouseButtonClick[buttonCheck] && !Widget::ignoreMouseClick[buttonCheck]));
+    else
+        return false;//No interaction
+}
+
+bool Widget::isButtonClicked(sf::Window const& mainWindow, sf::Mouse::Button buttonCheck)
+{
+    if (mainWindow.hasFocus())
+        return (Widget::mouseButtonClick[buttonCheck] && !Widget::ignoreMouseClick[buttonCheck]);
+    else
+        return false;//No interaction
+}
+
+bool Widget::isButtonMaintained(sf::Window const& mainWindow, sf::Mouse::Button buttonCheck)
+{
+    if (mainWindow.hasFocus())
+        return (Widget::mouseButtonsMaintained[buttonCheck] && !Widget::ignoreMouseMaintained[buttonCheck]);
+    else
+        return false;//No interaction
+}
+
+void Widget::ignoreButtonClick(sf::Window const& mainWindow, sf::Mouse::Button toIgnore)
+{
+    if (mainWindow.hasFocus())
+        Widget::ignoreMouseClick[toIgnore] = true;
+}
+
+void Widget::ignoreButtonMaintained(sf::Window const& mainWindow, sf::Mouse::Button toIgnore)
+{
+    if (mainWindow.hasFocus())
+        Widget::ignoreMouseMaintained[toIgnore] = true;
+}
+
+
+bool Widget::isWidgetContainer(Widget* toCheck)
+{
+    return (typeid(*toCheck) == typeid(Container));
 }
 
 Dummy::Dummy(std::string imagePath, sf::Vector2f size, sf::Vector2f pos)
@@ -314,7 +382,7 @@ sf::FloatRect Dummy::getGlobalBounds() const
     return sprite_.getGlobalBounds();
 }
 
-void Dummy::update(sf::RenderWindow& window, System* systemContainer)
+void Dummy::update(sf::RenderWindow& window)
 {
 
 }
@@ -381,9 +449,9 @@ std::string Button::getButtonString() const
     return buttonString.getString();
 }
 
-void Button::update(sf::RenderWindow& window, System* systemContainer)
+void Button::update(sf::RenderWindow& window)
 {
-    updateClick(window, &buttonShape.getGlobalBounds(), systemContainer);
+    updateClick(window, &buttonShape.getGlobalBounds());
 }
 
 void Button::draw(sf::RenderWindow& window) const
@@ -428,7 +496,7 @@ Slider::~Slider()
 
 }
 
-void Slider::update(sf::RenderWindow& window, System* systemContainer)
+void Slider::update(sf::RenderWindow& window)
 {
 
 }
@@ -459,9 +527,9 @@ bool Checkbox::getValue() const
     return value;
 }
 
-void Checkbox::update(sf::RenderWindow& window, System* systemContainer)
+void Checkbox::update(sf::RenderWindow& window)
 {
-    updateClick(window, &checkBoxChecked.getGlobalBounds(), systemContainer);
+    updateClick(window, &checkBoxChecked.getGlobalBounds());
 
     if (clicked)
         value = !value;
@@ -496,14 +564,14 @@ void Container::setTitle(std::string newTitle)
 
 
 
-void Container::update(sf::RenderWindow& window, System* systemContainer)
+void Container::update(sf::RenderWindow& window)
 {
     Container::memberInteracted = false;
     //First we update the container
 
     //Then we update every widget contained
     for (std::map<ID_TYPE, std::unique_ptr<Widget>>::reverse_iterator it = allWidgets.rbegin() ; it != allWidgets.rend() ; it++)
-        updateWidgetDirection(*(it->second), window, systemContainer);
+        updateWidgetDirection(*(it->second), window);
 }
 
 void Container::draw(sf::RenderWindow& window) const
@@ -545,9 +613,9 @@ Widget* Container::returnWidgetPointerOfID(ID_TYPE ID) const
         return findWidget->second.get();//Footnote : this syntax is horrible
 }
 
-void updateWidgetDirection(Widget& toUpdate, sf::RenderWindow& window, System* mainSystem)
+void updateWidgetDirection(Widget& toUpdate, sf::RenderWindow& window)
 {
-    toUpdate.update(window, mainSystem);
+    toUpdate.update(window);
 }
 
 void renderWidgetDirection(Widget& toRender, sf::RenderWindow& window)
