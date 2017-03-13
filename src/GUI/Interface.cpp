@@ -1,6 +1,10 @@
 
 #include "Interface.hpp"
 
+sf::Event Widget::events;
+std::vector<sf::Uint32> Widget::unicodeBuffer;
+std::vector<sf::Keyboard::Key> Widget::keyBuffer;
+
 ID_TYPE Widget::currentFontID = 1;//1, because 0 means there was no texture initially bound
 ID_TYPE Widget::currentTextureID = 1;
 std::map<std::string, ID_TYPE> Widget::stringToIDTableFont;
@@ -11,6 +15,7 @@ std::map<ID_TYPE, std::unique_ptr<sf::Texture>> Widget::widgetTextures;
 std::queue<ID_TYPE> Widget::vacantTextureID;
 bool Container::memberInteracted = false;
 
+bool Widget::widgetAlreadyHovered;
 bool Widget::mouseButtonsMaintained[sf::Mouse::ButtonCount];
 bool Widget::ignoreMouseMaintained[sf::Mouse::ButtonCount];
 bool Widget::mouseButtonClick[sf::Mouse::ButtonCount];
@@ -20,12 +25,9 @@ bool Widget::keyboardButtonPushed[sf::Keyboard::KeyCount];
 
 Widget::Widget()
 {
-    posAbsolute = false;
-    dragable = false;
-    resizable = false;
     clicked = false;
     clickMaintained = false;
-    toClose = false;
+    hovered = false;
 }
 
 Widget::Widget(int widgetX, int widgetY, bool setPosToAbsolute)
@@ -38,9 +40,29 @@ Widget::~Widget()
 
 }
 
-bool Widget::isHovered(sf::RenderWindow& window, sf::FloatRect* widgetShape) const
+bool Widget::isHovered(sf::RenderWindow& window, sf::FloatRect* widgetShape)
 {
-    return widgetShape->contains(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y);
+    bool isHoveredByMouse = widgetShape->contains(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y);
+
+    if (!isHoveredByMouse)
+    {
+        hovered = false;
+        return false;
+    }
+    else
+    {
+        if (Widget::widgetAlreadyHovered)
+        {
+            hovered = false;
+            return false;
+        }
+        else
+        {
+           hovered = true;
+           Widget::widgetAlreadyHovered = true;
+           return true;
+        }
+    }
 }
 
 bool Widget::isClicked() const
@@ -63,42 +85,25 @@ void Widget::draw(sf::RenderWindow& window) const
     //Nothing, you're not supposed to render a widget directly
 }
 
-
-
-void Widget::setPosAbsolute(bool isPosAbsolute)
+void Widget::updateMouseInteraction(sf::RenderWindow& window, sf::FloatRect* widgetShape)
 {
-    posAbsolute = isPosAbsolute;
-}
+    isHovered(window, widgetShape);
 
-void Widget::setDragable(bool isDragable)
-{
-    dragable = isDragable;
-}
-
-void Widget::setResizable(bool isResizable)
-{
-    resizable = isResizable;
-}
-
-void Widget::updateClick(sf::RenderWindow& window, sf::FloatRect* widgetShape)
-{
-    bool widgetHovered = isHovered(window, widgetShape);
-
-    if (widgetHovered &&
+    if (hovered &&
         Widget::isButtonClicked(window, sf::Mouse::Left) &&
         (!clicked))
     {
         Widget::ignoreButtonClick(window, sf::Mouse::Left);
         clicked = true;
     }
-    else if (widgetHovered &&
+    else if (hovered &&
              Widget::isButtonMaintained(window, sf::Mouse::Left) &&
              clicked)
     {
         clicked = false;
         clickMaintained = true;
     }
-    else if (!widgetHovered ||
+    else if (!hovered ||
              (!Widget::isButtonMaintained(window, sf::Mouse::Left) &&
               !Widget::isButtonClicked(window, sf::Mouse::Left)))
     {
@@ -216,15 +221,21 @@ bool Widget::Init(sf::Window const& mainWindow)
 
     for (int i(0) ; i < sf::Keyboard::KeyCount ; i++)
     {
-        keyboardButtonsMaintained[i] = false;
-        keyboardButtonPushed[i] = false;
+        Widget::keyboardButtonsMaintained[i] = false;
+        Widget::keyboardButtonPushed[i] = false;
     }
+
+    Widget::widgetAlreadyHovered = false;
 }
 
 void Widget::UpdateEvents(sf::Window const& mainWindow)
 {
     if (mainWindow.hasFocus())//In case there are multiple windows, we ensure that we only update events in the right window
     {
+        Widget::widgetAlreadyHovered = false;
+        Widget::unicodeBuffer.clear();
+        Widget::keyBuffer.clear();
+
         for (int i(0); i<sf::Keyboard::KeyCount ; i++)
         {
             if (sf::Keyboard::isKeyPressed(i))//If the button is pressed...
@@ -273,6 +284,30 @@ void Widget::UpdateEvents(sf::Window const& mainWindow)
                 Widget::ignoreMouseMaintained[i] = false;
             }
         }
+
+        sf::String userInput;
+        // ...
+        while( mainWindow.pollEvent(Widget::events) )
+        {
+            if(Widget::events.type == sf::Event::TextEntered)
+            {
+                std::cout << Widget::events.text.unicode << '\n';
+                Widget::unicodeBuffer.push_back(Widget::events.text.unicode);
+            }
+            if (Widget::events.type == sf::Event::KeyPressed)
+            {
+                Widget::keyBuffer.push_back(Widget::events.key.code);
+            }
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+            Widget::keyBuffer.push_back(sf::Keyboard::Left);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+            Widget::keyBuffer.push_back(sf::Keyboard::Right);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+            Widget::keyBuffer.push_back(sf::Keyboard::Up);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+            Widget::keyBuffer.push_back(sf::Keyboard::Down);
     }
 }
 
@@ -362,14 +397,34 @@ Dummy::Dummy(sf::Color const& fillColor, sf::Vector2f size, sf::Vector2f pos)
     sprite_.setColor(fillColor);
 }
 
-void Dummy::setPos(sf::Vector2f& newPos)
+void Dummy::setTexture(std::string imagePath)
+{
+    textureID = Widget::giveTextureID(imagePath);
+    sprite_.setTexture(*Widget::giveTexturePointerOfID(textureID));
+}
+
+void Dummy::setPosition(sf::Vector2f newPos)
 {
     sprite_.setPosition(newPos);
 }
 
-void Dummy::resizeDummy(sf::Vector2f& newSize)
+void Dummy::setSize(sf::Vector2f newSize)
 {
-    sprite_.setScale(newSize.x / sprite_.getTextureRect().width, newSize.y / sprite_.getTextureRect().height);
+    if (sprite_.getTextureRect().width && sprite_.getTextureRect().height)
+    {
+        sprite_.setScale(newSize.x / sprite_.getTextureRect().width, newSize.y / sprite_.getTextureRect().height);
+    }
+    else
+    {
+        sf::Texture tempTexture;
+        tempTexture.create(newSize.x, newSize.y);
+        sprite_.setTexture(tempTexture);
+    }
+}
+
+void Dummy::setFillColor(sf::Color newColor)
+{
+    sprite_.setColor(newColor);
 }
 
 sf::FloatRect Dummy::getLocalBounds() const
@@ -380,6 +435,21 @@ sf::FloatRect Dummy::getLocalBounds() const
 sf::FloatRect Dummy::getGlobalBounds() const
 {
     return sprite_.getGlobalBounds();
+}
+
+sf::Vector2f Dummy::getSize() const
+{
+    return sf::Vector2f(sprite_.getGlobalBounds().width - sprite_.getGlobalBounds().left, sprite_.getGlobalBounds().height - sprite_.getGlobalBounds().top);
+}
+
+sf::Vector2f Dummy::getPosition() const
+{
+    return sprite_.getPosition();
+}
+
+sf::Color Dummy::getFillColor() const
+{
+    return sprite_.getColor();
 }
 
 void Dummy::update(sf::RenderWindow& window)
@@ -400,28 +470,56 @@ Button::Button()
     buttonShape.setPosition(sf::Vector2f(0,0));
 }
 
-Button::Button(sf::Vector2f pos, sf::Color buttonColoration, std::string buttonContent, short fontSize, sf::Vector2f textPosPercent, short distTextBoundaries)
+Button::Button(sf::Vector2f pos, sf::Vector2i boundariesSize, sf::Color buttonColoration, std::string buttonContent, short fontSize, sf::Vector2f textPosPercent)
 {
-    sf::Font tempFont;
-    tempFont.loadFromFile("Cousine-Regular.TTF");
+    buttonColor = buttonColoration;
+    hoveredColor = buttonColor;
+    clickedColor = buttonColor;
 
-    buttonFont = std::make_shared<sf::Font>(tempFont);
+    fontID = Widget::giveFontID("Cousine-Regular.TTF");
+    buttonString.setFont(*Widget::giveFontPointerOfID(fontID));
 
-    sf::Sprite test;
-
+    buttonString.setString(buttonContent);
     buttonString.setColor(sf::Color(0,0,0));
     buttonString.setCharacterSize(fontSize);
 
-    buttonString.setFont(*buttonFont);
-    buttonString.setString(buttonContent);
+    buttonShape.setSize(sf::Vector2f(boundariesSize.x + buttonString.getLocalBounds().width ,
+                                     boundariesSize.y + buttonString.getLocalBounds().height));
 
-    buttonShape.setSize(sf::Vector2f(distTextBoundaries*2 + buttonString.getLocalBounds().width ,
-                                     distTextBoundaries*2 + buttonString.getLocalBounds().height));
+    textPos = textPosPercent;
+
     buttonShape.setFillColor(buttonColoration);
     buttonShape.setPosition(pos);
 
-    buttonString.setPosition(-buttonString.getGlobalBounds().left + buttonShape.getPosition().x + (float)textPosPercent.x * (buttonShape.getSize().x - buttonString.getLocalBounds().width) ,
-                             -buttonString.getGlobalBounds().top + buttonShape.getPosition().y + (float)textPosPercent.y * (buttonShape.getSize().y - buttonString.getLocalBounds().height));
+    buttonString.setPosition(-buttonString.getLocalBounds().left + buttonShape.getPosition().x + (float)textPos.x * (buttonShape.getSize().x - buttonString.getLocalBounds().width) ,
+                             -buttonString.getLocalBounds().top + buttonShape.getPosition().y + (float)textPos.y * (buttonShape.getSize().y - buttonString.getLocalBounds().height));
+}
+
+Button::Button(sf::Vector2f pos, sf::Vector2i boundariesSize, sf::Color buttonColoration, std::string texturePath, std::string buttonContent, short fontSize, sf::Vector2f textPosPercent)
+{
+    buttonColor = buttonColoration;
+    hoveredColor = buttonColor;
+    clickedColor = buttonColor;
+
+    fontID = Widget::giveFontID("Cousine-Regular.TTF");
+    buttonString.setFont(*Widget::giveFontPointerOfID(fontID));
+
+    buttonString.setString(buttonContent);
+    buttonString.setColor(sf::Color(0,0,0));
+    buttonString.setCharacterSize(fontSize);
+
+    buttonShape.setTexture(texturePath);
+
+    buttonShape.setSize(sf::Vector2f(boundariesSize.x + buttonString.getLocalBounds().width ,
+                                     boundariesSize.y + buttonString.getLocalBounds().height));
+
+    textPos = textPosPercent;
+
+    buttonShape.setFillColor(buttonColoration);
+    buttonShape.setPosition(pos);
+
+    buttonString.setPosition(-buttonString.getLocalBounds().left + buttonShape.getPosition().x + (float)textPos.x * (buttonShape.getSize().x - buttonString.getLocalBounds().width) ,
+                             -buttonString.getLocalBounds().top + buttonShape.getPosition().y + (float)textPos.y * (buttonShape.getSize().y - buttonString.getLocalBounds().height));
 }
 
 Button::~Button()
@@ -431,17 +529,48 @@ Button::~Button()
 
 void Button::setString(std::string stringToPut)
 {
+    sf::Vector2i boundariesSize;
+    boundariesSize.x = buttonShape.getSize().x - buttonString.getLocalBounds().width;
+    boundariesSize.y = buttonShape.getSize().y - buttonString.getLocalBounds().height;
 
+    buttonString.setString(stringToPut);
+
+    buttonShape.setSize(sf::Vector2f(boundariesSize.x + buttonString.getLocalBounds().width ,
+                                     boundariesSize.y + buttonString.getLocalBounds().height));
+
+
+    buttonString.setPosition(-buttonString.getLocalBounds().left + buttonShape.getPosition().x + (float)textPos.x * (buttonShape.getSize().x - buttonString.getLocalBounds().width) ,
+                             -buttonString.getLocalBounds().top + buttonShape.getPosition().y + (float)textPos.y * (buttonShape.getSize().y - buttonString.getLocalBounds().height));
 }
 
 void Button::setColor(sf::Color newColor)
 {
+    buttonColor = newColor;
+}
 
+void Button::setHoveredColor(sf::Color newColor)
+{
+    hoveredColor = newColor;
+}
+
+void Button::setClickedColor(sf::Color newColor)
+{
+    clickedColor = newColor;
 }
 
 sf::Color Button::getColor() const
 {
+    return buttonColor;
+}
 
+sf::Color Button::getHoveredColor() const
+{
+    return hoveredColor;
+}
+
+sf::Color Button::getClickedColor() const
+{
+    return clickedColor;
 }
 
 std::string Button::getButtonString() const
@@ -451,36 +580,30 @@ std::string Button::getButtonString() const
 
 void Button::update(sf::RenderWindow& window)
 {
-    updateClick(window, &buttonShape.getGlobalBounds());
+    updateMouseInteraction(window, &buttonShape.getGlobalBounds());
 }
 
 void Button::draw(sf::RenderWindow& window) const
 {
     if (clicked || clickMaintained)
     {
-        sf::Color temp(buttonShape.getFillColor());
-        sf::Color tempTwo(temp.r +50, temp.g +50, temp.b +50);
-        buttonShape.setFillColor(tempTwo);
-
-        window.draw(buttonShape);
+        buttonShape.setFillColor(clickedColor);
+        buttonShape.draw(window);
+        //window.draw(buttonShape);
         window.draw(buttonString);
-
-        buttonShape.setFillColor(temp);
     }
-    else if (isHovered(window, &buttonShape.getGlobalBounds()))
+    else if (hovered)
     {
-        sf::Color temp(buttonShape.getFillColor());
-        sf::Color tempTwo(temp.r + 25, temp.g + 25, temp.b + 25);
-        buttonShape.setFillColor(tempTwo);
-
-        window.draw(buttonShape);
+        buttonShape.setFillColor(hoveredColor);
+        buttonShape.draw(window);
+        //window.draw(buttonShape);
         window.draw(buttonString);
-
-        buttonShape.setFillColor(temp);
     }
     else
     {
-        window.draw(buttonShape);
+        buttonShape.setFillColor(buttonColor);
+        buttonShape.draw(window);
+        //window.draw(buttonShape);
         window.draw(buttonString);
     }
 
@@ -529,7 +652,7 @@ bool Checkbox::getValue() const
 
 void Checkbox::update(sf::RenderWindow& window)
 {
-    updateClick(window, &checkBoxChecked.getGlobalBounds());
+    updateMouseInteraction(window, &checkBoxChecked.getGlobalBounds());
 
     if (clicked)
         value = !value;

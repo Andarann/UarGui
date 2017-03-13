@@ -22,15 +22,24 @@ void gameLoop()
         mainSystem.addHumanToSystem(Human(sf::Color(255,255,255), 50, 50, temp, mainSystem));
     }
 
+    InputValue<double> myInput;
+
     sf::Color myColor(255,0,0);
 
-    mainSystem.addWidget(Button(sf::Vector2f(5,5), sf::Color(25,43,54), "", 20, sf::Vector2f(0,0), 20), "me");
+    mainSystem.addWidget( InputValue<sf::String>(sf::Vector2f(0,0), sf::Vector2f(500,500),"2.jpg", sf::Vector2f(0,0), sf::Vector2f(1.0,1.0), 20, "€") , "me");
+    InputValue<sf::String> *me = mainSystem.giveWidgetPointer("me");
+
+    //mainSystem.addWidget(Dummy("gris.png", sf::Vector2f(40,20)), "me1");
+
+    //mainSystem.addWidget(Button(sf::Vector2f(5,5), sf::Color(25,43,54), "", 20, sf::Vector2f(0,0), 20), "me");
     //mainSystem.addWidget(Dummy(myColor, sf::Vector2f(50,50), sf::Vector2f(10,10)), "test1");
     //mainSystem.addWidget(Dummy(myColor, sf::Vector2f(50,50), sf::Vector2f(10,10)), "test2");
 
     do
     {
         mainSystem.Update();
+
+
 
         mainSystem.Render();
 
@@ -60,8 +69,8 @@ void System::Update()
     windowMain.pollEvent(event);
 
     updateMouseButton();
-    updateKeyboardButton();
-    manageWindowEvent(event, windowMain, FPS);
+    //updateKeyboardButton();
+    //manageWindowEvent(event, windowMain, FPS);
 
     Widget::UpdateEvents(windowMain);
 
@@ -731,10 +740,10 @@ System::System() : windowMain(sf::VideoMode(INITIAL_WINDOW_WIDTH, INITIAL_WINDOW
         ignoreMouseMaintained[i] = false;
     }
 
-    debug_font.loadFromFile("FATPIXEL.TTF");//Thanks to the author (REMIND : credit him)
+    debug_font.loadFromFile("arial.ttf");//Thanks to the author (REMIND : credit him)
 
     displayConsole = false;
-    displayDebug = true;//Pretty self-explanatory : if true, debug infos are displayed
+    displayDebug = false;//Pretty self-explanatory : if true, debug infos are displayed
     displayChunksBoundaries = true;
 
     currentType = MENU;
