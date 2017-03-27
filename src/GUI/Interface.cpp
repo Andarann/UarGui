@@ -291,7 +291,6 @@ void Widget::UpdateEvents(sf::Window const& mainWindow)
         {
             if(Widget::events.type == sf::Event::TextEntered)
             {
-                std::cout << Widget::events.text.unicode << '\n';
                 Widget::unicodeBuffer.push_back(Widget::events.text.unicode);
             }
             if (Widget::events.type == sf::Event::KeyPressed)

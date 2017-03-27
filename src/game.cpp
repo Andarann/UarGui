@@ -5,6 +5,8 @@
 #include "Human.hpp"
 #include "Nodes.hpp"
 
+#include "RichText+.hpp"
+
 unsigned int Entity::currentID = 0;//Everytime the program is launched, currentID is initialized to 0
 unsigned int wishedFPS = 60;
 unsigned int Path::currentID = 0;
@@ -16,6 +18,8 @@ void gameLoop()
     Entity temp;
     Widget::Init(*mainSystem.returnRenderWindowPointer());
 
+
+
     for (int i(0); i < 20 ; i++)
     {
         temp = Entity(i*200, i*200);
@@ -26,20 +30,13 @@ void gameLoop()
 
     sf::Color myColor(255,0,0);
 
-    mainSystem.addWidget( InputValue<sf::String>(sf::Vector2f(0,0), sf::Vector2f(500,500),"2.jpg", sf::Vector2f(0,0), sf::Vector2f(1.0,1.0), 20, "€") , "me");
-    InputValue<sf::String> *me = mainSystem.giveWidgetPointer("me");
-
-    //mainSystem.addWidget(Dummy("gris.png", sf::Vector2f(40,20)), "me1");
-
-    //mainSystem.addWidget(Button(sf::Vector2f(5,5), sf::Color(25,43,54), "", 20, sf::Vector2f(0,0), 20), "me");
-    //mainSystem.addWidget(Dummy(myColor, sf::Vector2f(50,50), sf::Vector2f(10,10)), "test1");
-    //mainSystem.addWidget(Dummy(myColor, sf::Vector2f(50,50), sf::Vector2f(10,10)), "test2");
+    mainSystem.addWidget( InputValue<double>(sf::Vector2f(0,0), sf::Vector2f(500,500),"2.jpg", sf::Vector2f(0.0,0.1), sf::Vector2f(1.0,1.0), 120, 20.22, 1, 100) , "me");
+    InputValue<double> *me = mainSystem.giveWidgetPointer("me");
+    me->changeValue(57.21);
 
     do
     {
         mainSystem.Update();
-
-
 
         mainSystem.Render();
 
@@ -75,7 +72,7 @@ void System::Update()
     Widget::UpdateEvents(windowMain);
 
     updateWidgets();
-    ImGui::SFML::Update(windowMain, imGuiClock.restart());
+//    ImGui::SFML::Update(windowMain, imGuiClock.restart());
     Human::Update(allHumans, windowMain, *this);
 
     updateChunksList(windowMain);
@@ -83,6 +80,9 @@ void System::Update()
 
 void System::Render()
 {
+    sf::Font font;
+    font.loadFromFile("ariali.ttf");
+
     windowMain.clear();//Rendering part
     {
         displayChunks(windowMain);
@@ -99,7 +99,7 @@ void System::Render()
         console();
 
         renderWidgets();
-        ImGui::Render();
+//        ImGui::Render();
     }
     windowMain.display();
 
@@ -615,13 +615,13 @@ void System::updateKeyboardButton()
         }
     }
 
-    if (ImGui::IsMouseHoveringAnyWindow() && checkMouseButtonClicked(sf::Mouse::Left))
-            nullifyClick(sf::Mouse::Left);
+//    if (ImGui::IsMouseHoveringAnyWindow() && checkMouseButtonClicked(sf::Mouse::Left))
+//           nullifyClick(sf::Mouse::Left);
 }
 
 void System::editMenu()
 {
-    ImGui::SetNextWindowPos(ImVec2(0,0));
+    /*ImGui::SetNextWindowPos(ImVec2(0,0));
     ImGui::SetNextTreeNodeOpen(false);
 
     ImGui::Begin("Editor");
@@ -661,12 +661,12 @@ void System::editMenu()
         ImGui::End();
     }
 
-    ImGui::End();
+    ImGui::End();*/
 }
 
 void System::console()
 {
-    if (displayConsole)
+    /*if (displayConsole)
     {
         ImGui::SetNextWindowSize(ImVec2(100, 20));
         ImGui::Begin("Console");
@@ -683,7 +683,7 @@ void System::console()
         delete tempText;
 
         ImGui::End();
-    }
+    }*/
 }
 
 void System::manageWindowEvent(sf::Event event, sf::RenderWindow& window, int FPS)
@@ -756,7 +756,7 @@ System::System() : windowMain(sf::VideoMode(INITIAL_WINDOW_WIDTH, INITIAL_WINDOW
     FPS = wishedFPS;
 
     //We initialize the GUI system for this window
-    ImGui::SFML::Init(windowMain);
+//    ImGui::SFML::Init(windowMain);
 
     xUp = -100;
     yUp = -100;

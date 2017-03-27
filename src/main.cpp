@@ -6,9 +6,8 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
-#include "mingw.thread.h"
-#include "mingw.mutex.h"
 #include <queue>
+#include <random>
 
 int main()
 {

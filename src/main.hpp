@@ -7,9 +7,6 @@
 
 #include <iostream>
 
-#include "imgui.h"
-#include "imgui-sfml.h"
-
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/System/Clock.hpp>

@@ -13,6 +13,7 @@
 #include <SFML/Graphics.hpp>
 #include <typeinfo>
 #include <windows.h>
+
 /**
 Hello and welcome to this tutorial on how to use the basics of this GUI system
 
@@ -303,20 +304,23 @@ public:
     //The default constructor of T will be used, no parameter sent
     InputValue() : background()
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
+
         limits = false;
         aNumber = isNumber();
         selected = false;
 
-        changeValue(T());
-
         textRelPos = sf::Vector2f(0,0);
         textBoxSize = sf::Vector2f(1,1);
 
-        loadFont("Cousine-Regular.TTF");
+        loadFont("arial.ttf");
         contentText.setFillColor(sf::Color(0,0,0));
         contentText.setString(valueContained);
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(1);
+
+        changeValue(T());
 
         cursorPos = valueContained.size();
 
@@ -325,20 +329,23 @@ public:
 
     InputValue(T initValue) : background()
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
+
         limits = false;
         aNumber = isNumber();
         selected = false;
 
-        changeValue(initValue);
-
         textRelPos = sf::Vector2f(0,0);
         textBoxSize = sf::Vector2f(1,1);
 
-        loadFont("Cousine-Regular.TTF");
+        loadFont("arial.ttf");
         contentText.setFillColor(sf::Color(0,0,0));
         contentText.setString(valueContained);
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(1);
+
+        changeValue(initValue);
 
         cursorPos = valueContained.size();
 
@@ -347,6 +354,9 @@ public:
 
     InputValue(T initValue, T minValue_, T maxValue_) : background()
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
+
         limits = true;
         aNumber = isNumber();
         selected = false;
@@ -354,16 +364,16 @@ public:
         minValue = minValue_;
         maxValue = maxValue_;
 
-        changeValue(initValue);
-
         textRelPos = sf::Vector2f(0,0);
         textBoxSize = sf::Vector2f(1,1);
 
-        loadFont("Cousine-Regular.TTF");
+        loadFont("arial.ttf");
         contentText.setFillColor(sf::Color(0,0,0));
         contentText.setString(valueContained);
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(1);
+
+        changeValue(initValue);
 
         cursorPos = valueContained.size();
 
@@ -373,11 +383,12 @@ public:
     InputValue(sf::Vector2f pos, sf::Vector2f size, sf::Color color, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize)//The default constructor of T will be used, no parameter sent
         : background(color, size, pos)
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
+
         limits = false;
         aNumber = isNumber();
         selected = false;
-
-        changeValue(T());
 
         textRelPos = sf::Vector2f(pos.x * relativeTextPosPer_.x, pos.y * relativeTextPosPer_.y);
         textBoxSize = sf::Vector2f(size.x * textBoxSizePer_.x, size.y * textBoxSizePer_.y);
@@ -388,11 +399,13 @@ public:
         if (textRelPos.y + textBoxSize.y > size.y)
             textBoxSize.y = size.y - textRelPos.y;
 
-        loadFont("Cousine-Regular.TTF");
+        loadFont("arial.ttf");
         contentText.setFillColor(sf::Color(0,0,0));
         contentText.setString(valueContained);
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(characterSize);
+
+        changeValue(T());
 
         cursorPos = valueContained.size();
 
@@ -402,11 +415,12 @@ public:
     InputValue(sf::Vector2f pos, sf::Vector2f size, sf::Color color, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, T initValue)
             : background(color, size, pos)
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
+
         limits = false;
         aNumber = isNumber();
         selected = false;
-
-        changeValue(initValue);
 
         textRelPos = sf::Vector2f(pos.x * relativeTextPosPer_.x, pos.y * relativeTextPosPer_.y);
         textBoxSize = sf::Vector2f(size.x * textBoxSizePer_.x, size.y * textBoxSizePer_.y);
@@ -417,11 +431,13 @@ public:
         if (textRelPos.y + textBoxSize.y > size.y)
             textBoxSize.y = size.y - textRelPos.y;
 
-        loadFont("Cousine-Regular.TTF");
+        loadFont("arial.ttf");
         contentText.setFillColor(sf::Color(0,0,0));
         contentText.setString(valueContained);
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(characterSize);
+
+        changeValue(initValue);
 
         cursorPos = valueContained.size();
 
@@ -431,14 +447,15 @@ public:
     InputValue(sf::Vector2f pos, sf::Vector2f size, sf::Color color, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, T initValue, T minValue_, T maxValue_)
             : background(color, size, pos)
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
+
         limits = true;
         aNumber = isNumber();
         selected = false;
 
         minValue = minValue_;
         maxValue = maxValue_;
-
-        changeValue(initValue);
 
         textRelPos = sf::Vector2f(pos.x * relativeTextPosPer_.x, pos.y * relativeTextPosPer_.y);
         textBoxSize = sf::Vector2f(size.x * textBoxSizePer_.x, size.y * textBoxSizePer_.y);
@@ -449,11 +466,13 @@ public:
         if (textRelPos.y + textBoxSize.y > size.y)
             textBoxSize.y = size.y - textRelPos.y;
 
-        loadFont("Cousine-Regular.TTF");
+        loadFont("arial.ttf");
         contentText.setFillColor(sf::Color(0,0,0));
         contentText.setString(valueContained);
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(characterSize);
+
+        changeValue(initValue);
 
         cursorPos = valueContained.size();
 
@@ -463,11 +482,12 @@ public:
     InputValue(sf::Vector2f pos, sf::Vector2f size, std::string texturePath, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize)//The default constructor of T will be used, no parameter sent
             : background(texturePath, size, pos)
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
+
         limits = false;
         aNumber = isNumber();
         selected = false;
-
-        changeValue(T());
 
         textRelPos = sf::Vector2f(pos.x * relativeTextPosPer_.x, pos.y * relativeTextPosPer_.y);
         textBoxSize = sf::Vector2f(size.x * textBoxSizePer_.x, size.y * textBoxSizePer_.y);
@@ -478,11 +498,13 @@ public:
         if (textRelPos.y + textBoxSize.y > size.y)
             textBoxSize.y = size.y - textRelPos.y;
 
-        loadFont("Cousine-Regular.TTF");
+        loadFont("arial.ttf");
         contentText.setFillColor(sf::Color(0,0,0));
         contentText.setString(valueContained);
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(characterSize);
+
+        changeValue(T());
 
         cursorPos = valueContained.size();
 
@@ -492,11 +514,12 @@ public:
     InputValue(sf::Vector2f pos, sf::Vector2f size, std::string texturePath, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, T initValue)
             : background(texturePath, size, pos)
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
+
         limits = false;
         aNumber = isNumber();
         selected = false;
-
-        changeValue(initValue);
 
         textRelPos = sf::Vector2f(pos.x * relativeTextPosPer_.x, pos.y * relativeTextPosPer_.y);
         textBoxSize = sf::Vector2f(size.x * textBoxSizePer_.x, size.y * textBoxSizePer_.y);
@@ -507,11 +530,13 @@ public:
         if (textRelPos.y + textBoxSize.y > size.y)
             textBoxSize.y = size.y - textRelPos.y;
 
-        loadFont("Cousine-Regular.TTF");
+        loadFont("arial.ttf");
         contentText.setFillColor(sf::Color(0,0,0));
         contentText.setString(valueContained);
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(characterSize);
+
+        changeValue(initValue);
 
         cursorPos = valueContained.size();
 
@@ -521,14 +546,15 @@ public:
     InputValue(sf::Vector2f pos, sf::Vector2f size, std::string texturePath, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, T initValue, T minValue_, T maxValue_)
             : background(texturePath, size, pos)
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
+
         limits = true;
         aNumber = isNumber();
         selected = false;
 
         minValue = minValue_;
         maxValue = maxValue_;
-
-        changeValue(initValue);
 
         textRelPos = sf::Vector2f(pos.x * relativeTextPosPer_.x, pos.y * relativeTextPosPer_.y);
         textBoxSize = sf::Vector2f(size.x * textBoxSizePer_.x, size.y * textBoxSizePer_.y);
@@ -539,11 +565,13 @@ public:
         if (textRelPos.y + textBoxSize.y > size.y)
             textBoxSize.y = size.y - textRelPos.y;
 
-        loadFont("Cousine-Regular.TTF");
+        loadFont("arial.ttf");
         contentText.setFillColor(sf::Color(0,0,0));
         contentText.setString(valueContained);
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(characterSize);
+
+        changeValue(initValue);
 
         cursorPos = valueContained.size();
 
@@ -552,20 +580,25 @@ public:
 
     ~InputValue() {};
 
-
-    template<typename U>
-    U returnValue() const
+    T returnValue() const
     {
-        U toReturn;
-        std::stringstream valueStr;
+        if (valueContained.size())
+        {
+            T toReturn;
+            std::stringstream valueStr;
 
-        valueStr << valueContained;
-        valueStr >> toReturn;
+            valueStr << valueContained;
+            valueStr >> toReturn;
 
-        return toReturn;
+            return toReturn;
+        }
+        else
+        {
+            return T();
+        }
     };
 
-    std::string returnValue() const
+    std::string returnString() const
     {
         return valueContained;
     };
@@ -583,6 +616,8 @@ public:
         std::stringstream newValue;
         newValue << toPut;
         valueContained = newValue.str();
+
+        updateSprite();
     };
 
     bool isNumber() const
@@ -595,58 +630,87 @@ public:
         return (testType == before);
     }
 
-    void adaptTextToBox()
-    {
-        sf::Text setHeight;
-        setHeight.setString("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890");
-        setHeight.setFont(*contentText.getFont());
-        setHeight.setCharacterSize(0);
-
-        for (int i(0) ; textBoxSize.y - setHeight.getLocalBounds().top >= setHeight.getLocalBounds().height ; i++)
-        {
-            setHeight.setCharacterSize(i);
-            contentText.setCharacterSize(i - 1);
-        }
-    }
-
     void updateSprite()
     {
-        sf::RenderTexture tempText;
-
-        tempText.create(textBoxSize.x, textBoxSize.y);
-
-        sf::Vector2f tempPos(contentText.getPosition());
-        this->contentText.setString(valueContained);
-
         double x(0.0);
         double y(0.0);
 
-        if (contentText.getLocalBounds().width + contentText.getLocalBounds().left > tempText.getSize().x)
-            x = -(contentText.getLocalBounds().width + contentText.getLocalBounds().left) + tempText.getSize().x;
-        else
-            x = 0.0;
+        sf::RenderTexture tempText;
+        sf::Vector2f tempPos(contentText.getPosition());
 
-        if (contentText.getLocalBounds().height + contentText.getLocalBounds().top > tempText.getSize().y)
-            y = -(contentText.getLocalBounds().height + contentText.getLocalBounds().top) + tempText.getSize().y;
-        else
-            y = 0.0;
+        tempText.create(textBoxSize.x, textBoxSize.y);
+        contentText.setString(returnString());
+
+        std::size_t cursorAbsolutePos(0);
+
+        cursorAbsolutePos += cursorPos;
+
+        adaptHorizontalBounds(cursorAbsolutePos);
+        x = textHorizontalOffset;
+
+        adaptVerticalBounds(cursorAbsolutePos);
+        y = textVerticalOffset;
 
         this->contentText.setPosition(x,y);
 
         tempText.draw(contentText);
         tempText.display();
 
+        myTexture.reset();
         myTexture = std::make_shared<sf::Texture>(tempText.getTexture());
 
         textToDisplay.setTexture(*myTexture);
         textToDisplay.setPosition(background.getPosition().x + textRelPos.x, background.getPosition().y + textRelPos.y);
 
+        cursorMarker.setFillColor(contentText.getFillColor());
+        cursorMarker.setSize(sf::Vector2f(1,contentText.getFont()->getLineSpacing(contentText.getCharacterSize())));
+        cursorMarker.setPosition(sf::Vector2f(tempPos.x + textHorizontalOffset + contentText.findCharacterPos(cursorAbsolutePos).x - contentText.findCharacterPos(0).x
+                                              ,tempPos.y + textVerticalOffset + contentText.findCharacterPos(cursorAbsolutePos).y - contentText.findCharacterPos(0).y
+                                              ));
+
         this->contentText.setPosition(tempPos);
+    }
+
+    void adaptHorizontalBounds(std::size_t cursorAbsolutePos)
+    {
+        if (textHorizontalOffset + contentText.findCharacterPos(cursorAbsolutePos).x - contentText.findCharacterPos(0).x < 0)
+        {
+            while (textHorizontalOffset + contentText.findCharacterPos(cursorAbsolutePos).x - contentText.findCharacterPos(0).x < 0)
+                textHorizontalOffset++;
+
+            if (textHorizontalOffset > 0)
+                textHorizontalOffset = 0;
+        }
+        else if (textHorizontalOffset + contentText.findCharacterPos(cursorAbsolutePos).x - contentText.findCharacterPos(0).x > textBoxSize.x)
+        {
+            if (-contentText.getCharacterSize()*2 + textHorizontalOffset - contentText.findCharacterPos(0).x < -contentText.findCharacterPos(valueContained.size()).x)
+                textHorizontalOffset = -contentText.findCharacterPos(valueContained.size()).x;
+            else
+                while ((textHorizontalOffset + contentText.findCharacterPos(cursorAbsolutePos).x - contentText.findCharacterPos(0).x > textBoxSize.x))
+                    textHorizontalOffset--;
+        }
+    }
+
+    void adaptVerticalBounds(std::size_t cursorAbsolutePos)
+    {
+        if (textVerticalOffset + contentText.findCharacterPos(cursorAbsolutePos).y - contentText.findCharacterPos(0).y < 0)
+        {
+            while (textVerticalOffset + contentText.findCharacterPos(cursorAbsolutePos).y - contentText.findCharacterPos(0).y < 0)
+                textVerticalOffset ++;
+
+            if (textVerticalOffset > 0)
+                textVerticalOffset = 0;
+        }
+        else if (textVerticalOffset + contentText.findCharacterPos(cursorAbsolutePos).y - contentText.findCharacterPos(0).y + contentText.getFont()->getLineSpacing(contentText.getCharacterSize()) > textBoxSize.y)
+        {
+            while ((textVerticalOffset + contentText.findCharacterPos(cursorAbsolutePos).y - contentText.findCharacterPos(0).y + contentText.getFont()->getLineSpacing(contentText.getCharacterSize()) > textBoxSize.y))
+                textVerticalOffset--;
+        }
     }
 
     void putValueBetweenLimits()
     {
-        T currentValue = returnValue<T>();
+        T currentValue = returnValue();
 
         if (!limits)
         {
@@ -686,23 +750,29 @@ public:
 
         if (selected)
         {
+            std::size_t cursorPosBefore(cursorPos);
+            std::size_t currentLineBefore(currentLine);
+            std::string beforeModifText(valueContained);
+
             if (Widget::unicodeBuffer.size())
             {
-                std::string beforeModifText(valueContained);
 
                 for (int i(0) ; i < Widget::unicodeBuffer.size() ; i++)
                 {
-                    std::cout << Widget::unicodeBuffer[i] << '\n';
+                    //std::cout << Widget::unicodeBuffer[i] << '\n';
                     switch (Widget::unicodeBuffer[i])
                     {
                     case 8://Delete
 
-                        if (valueContained.size() > 0)
-                            valueContained.erase(valueContained.begin()+(valueContained.size() - 1));
+                        if (cursorPos > 0)
+                        {
+                            valueContained.erase(valueContained.begin() + cursorPos - 1);
+                        }
 
                         break;
 
-                    case 13://Delete
+
+                    case 13://Enter
 
                         if (!aNumber)
                             valueContained += '\n';
@@ -711,13 +781,14 @@ public:
 
                     case 45://Minus
 
-                        if (aNumber)
+                        if (aNumber && cursorPos == 0)
                         {
+                            minValue;
                             if (valueContained.find((char)45) == std::string::npos)
-                                valueContained += (char)Widget::unicodeBuffer[i];
+                                valueContained.insert(valueContained.begin() + cursorPos, (char)Widget::unicodeBuffer[i]);
                         }
                         else
-                            valueContained += (char)Widget::unicodeBuffer[i];
+                            valueContained.insert(valueContained.begin() + cursorPos, (char)Widget::unicodeBuffer[i]);
 
                         break;
 
@@ -726,10 +797,10 @@ public:
                         if (aNumber)
                         {
                             if (valueContained.find((char)46) == std::string::npos)
-                                valueContained += (char)Widget::unicodeBuffer[i];
+                                valueContained.insert(valueContained.begin() + cursorPos, (char)Widget::unicodeBuffer[i]);
                         }
                         else
-                            valueContained += (char)Widget::unicodeBuffer[i];
+                            valueContained.insert(valueContained.begin() + cursorPos, (char)Widget::unicodeBuffer[i]);
 
                         break;
 
@@ -743,29 +814,75 @@ public:
                     case 55:
                     case 56:
                     case 57://Numbers
-                        valueContained += (char)Widget::unicodeBuffer[i];
+                        valueContained.insert(valueContained.begin() + cursorPos, (char)Widget::unicodeBuffer[i]);
                         break;
-
                     default:
 
                         if (!aNumber)
-                            valueContained += (char)Widget::unicodeBuffer[i];
+                            valueContained.insert(valueContained.begin() + cursorPos, (char)Widget::unicodeBuffer[i]);
 
                         break;
                     }
                 }
+            }
 
-                if (valueContained != beforeModifText)//Update the sprite
+            if (Widget::keyBuffer.size())
+            {
+                for (int i(0) ; i < Widget::keyBuffer.size() ; i++)
                 {
-                    if (aNumber)
-                        putValueBetweenLimits();
+                    switch (Widget::keyBuffer[i])
+                    {
+                        case 71://Left
+                            if (cursorPos)
+                                cursorPos--;
+                            break;
+                        case 72://Right
+                            if (cursorPos < valueContained.size())
+                                cursorPos++;
+                            break;
+                        case 73://Up
 
-                    cursorPos += valueContained.size() - beforeModifText.size();
+                            if (currentLine > 0)
+                            {
+                                if (valueContained.size() < cursorPos)
+                                {
+                                    cursorPos = valueContained.size();
+                                }
+                                //else, value unchanged
+                                currentLine--;
+                            }
 
-                    std::cout << "Cursos pos is now : " << cursorPos << '\n';
+                            break;
+                        case 74://Down
 
-                    updateSprite();
+                            if (currentLine < valueContained.size() - 1)
+                            {
+                                if (valueContained.size() < cursorPos)
+                                {
+                                    cursorPos = valueContained.size();
+                                }
+                                //else, value unchanged
+                                currentLine++;
+                            }
+
+                            break;
+                    }
                 }
+            }
+
+
+            if (valueContained != beforeModifText || cursorPosBefore != cursorPos || currentLineBefore != currentLine)//Update the sprite
+            {
+                if (aNumber && returnValue() != T())//If its a non-empty number
+                {
+                    putValueBetweenLimits();
+                }
+
+                cursorPos += valueContained.size() - beforeModifText.size();
+
+                updateSprite();
+
+                std::cout << this->returnValue() + 3 << '\n';
             }
         }
     };
@@ -774,14 +891,16 @@ public:
     {
         background.draw(window);
         window.draw(textToDisplay);
+        window.draw(cursorMarker);
     };
 
 private:
-    int cursorPos;
+    std::size_t cursorPos;
+    std::size_t currentLine;
+    bool selected;
 
     bool limits;
     bool aNumber;
-    bool selected;
 
     T minValue, maxValue;
     T currentValue;
@@ -793,21 +912,24 @@ private:
     sf::Vector2f textRelPos;
     sf::Vector2f textBoxSize;
     sf::Sprite textToDisplay;
+    sf::RectangleShape cursorMarker;
 
     std::shared_ptr<sf::Texture> myTexture;
 
     Dummy background;
+
+    int textHorizontalOffset;//number of pixels by which the text is pasted to the right
+    int textVerticalOffset;//same but on y-axis
 };
 
-template<>
-class InputValue<sf::String> : public Widget{
+class InputString : public Widget{
 public:
     //The default constructor of T will be used, no parameter sent
-    InputValue() : background()
+    InputString() : background()
     {
+        textHorizontalOffset = 0;
+        textVerticalOffset = 0;
         selected = false;
-        renderFromLowerCursorBound = true;
-        renderFromLowerLineBound = true;
 
         changeValue(std::string());
 
@@ -820,14 +942,14 @@ public:
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(1);
 
-        updateSprite(false);
+        updateSprite();
     };
 
-    InputValue(sf::String initValue) : background()
+    InputString(sf::String initValue) : background()
     {
+        textHorizontalOffset = 0;
+        textVerticalOffset = 0;
         selected = false;
-        renderFromLowerCursorBound = true;
-        renderFromLowerLineBound = true;
 
         changeValue(initValue);
 
@@ -840,14 +962,14 @@ public:
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(1);
 
-        updateSprite(false);
+        updateSprite();
     };
 
-    InputValue(sf::String initValue, sf::String minValue_, sf::String maxValue_) : background()
+    InputString(sf::String initValue, sf::String minValue_, sf::String maxValue_) : background()
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
         selected = false;
-        renderFromLowerCursorBound = true;
-        renderFromLowerLineBound = true;
 
         changeValue(initValue);
 
@@ -860,15 +982,15 @@ public:
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(1);
 
-        updateSprite(false);
+        updateSprite();
     };
 
-    InputValue(sf::Vector2f pos, sf::Vector2f size, sf::Color color, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize)//The default constructor of T will be used, no parameter sent
+    InputString(sf::Vector2f pos, sf::Vector2f size, sf::Color color, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize)//The default constructor of T will be used, no parameter sent
         : background(color, size, pos)
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
         selected = false;
-        renderFromLowerCursorBound = true;
-        renderFromLowerLineBound = true;
 
         changeValue(std::string());
 
@@ -887,15 +1009,15 @@ public:
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(characterSize);
 
-        updateSprite(false);
+        updateSprite();
     };
 
-    InputValue(sf::Vector2f pos, sf::Vector2f size, sf::Color color, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, sf::String initValue)
+    InputString(sf::Vector2f pos, sf::Vector2f size, sf::Color color, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, sf::String initValue)
             : background(color, size, pos)
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
         selected = false;
-        renderFromLowerCursorBound = true;
-        renderFromLowerLineBound = true;
 
         changeValue(initValue);
 
@@ -914,16 +1036,15 @@ public:
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(characterSize);
 
-        updateSprite(false);
+        updateSprite();
     };
 
-    InputValue(sf::Vector2f pos, sf::Vector2f size, sf::Color color, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, sf::String initValue, sf::String minValue_, sf::String maxValue_)
+    InputString(sf::Vector2f pos, sf::Vector2f size, sf::Color color, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, sf::String initValue, sf::String minValue_, sf::String maxValue_)
             : background(color, size, pos)
     {
-
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
         selected = false;
-        renderFromLowerCursorBound = true;
-        renderFromLowerLineBound = true;
 
         changeValue(initValue);
 
@@ -942,15 +1063,15 @@ public:
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(characterSize);
 
-        updateSprite(false);
+        updateSprite();
     };
 
-    InputValue(sf::Vector2f pos, sf::Vector2f size, std::string texturePath, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize)//The default constructor of T will be used, no parameter sent
+    InputString(sf::Vector2f pos, sf::Vector2f size, std::string texturePath, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize)//The default constructor of T will be used, no parameter sent
             : background(texturePath, size, pos)
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
         selected = false;
-        renderFromLowerCursorBound = true;
-        renderFromLowerLineBound = true;
 
         changeValue(std::string());
 
@@ -969,15 +1090,15 @@ public:
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(characterSize);
 
-        updateSprite(false);
+        updateSprite();
     };
 
-    InputValue(sf::Vector2f pos, sf::Vector2f size, std::string texturePath, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, sf::String initValue)
+    InputString(sf::Vector2f pos, sf::Vector2f size, std::string texturePath, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, sf::String initValue)
             : background(texturePath, size, pos)
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
         selected = false;
-        renderFromLowerCursorBound = true;
-        renderFromLowerLineBound = true;
 
         changeValue(initValue);
 
@@ -996,15 +1117,15 @@ public:
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(characterSize);
 
-        updateSprite(false);
+        updateSprite();
     };
 
-    InputValue(sf::Vector2f pos, sf::Vector2f size, std::string texturePath, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, sf::String initValue, sf::String minValue_, sf::String maxValue_)
+    InputString(sf::Vector2f pos, sf::Vector2f size, std::string texturePath, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, sf::String initValue, sf::String minValue_, sf::String maxValue_)
             : background(texturePath, size, pos)
     {
+        textVerticalOffset = 0;
+        textHorizontalOffset = 0;
         selected = false;
-        renderFromLowerCursorBound = true;
-        renderFromLowerLineBound = true;
 
         changeValue(initValue);
 
@@ -1023,10 +1144,10 @@ public:
         contentText.setPosition(textRelPos.x + background.getPosition().x, textRelPos.y + background.getPosition().y);
         contentText.setCharacterSize(characterSize);
 
-        updateSprite(false);
+        updateSprite();
     };
 
-    ~InputValue() {};
+    ~InputString() {};
 
     sf::String returnValue() const
     {
@@ -1051,56 +1172,38 @@ public:
     {
         valueContained.clear();
 
-        /*std::stringstream newValue;
-        newValue << toPut;
-
-        for (int i(0) ; !newValue.eof() ; i++)
+        if (toPut.find('\n') == sf::String::InvalidPos)
         {
-            valueContained.push_back("");
-            std::getline(newValue, valueContained[i]);
-        }*/
-
-        std::size_t pos(0);
-
-        do
+            valueContained.push_back(toPut);
+        }
+        else
         {
-            valueContained.push_back(toPut.substring(pos, toPut.find('\n') - pos + 1));
-        } while (toPut.find('\n') != sf::String::InvalidPos) ;
+            std::size_t pos(0);
+            std::size_t nextJump(0);
+
+            do
+            {
+                nextJump = toPut.find(pos + 1);
+                valueContained.push_back(toPut.substring(pos, nextJump));
+                pos = nextJump;
+            } while (pos != sf::String::InvalidPos);
+        }
 
         currentLine = valueContained.size() - 1;
-        cursorPos = 0;
+
+        if (valueContained.size() >= 1)
+            cursorPos = valueContained[currentLine].getSize();
     };
 
-    void setTextRelPos()
+    void updateSprite()
     {
-
-    }
-
-    void adaptTextToBox()
-    {
-        sf::Text setHeight;
-        setHeight.setString("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890");
-        setHeight.setFont(*contentText.getFont());
-        setHeight.setCharacterSize(0);
-
-        for (int i(0) ; textBoxSize.y - setHeight.getLocalBounds().top >= setHeight.getLocalBounds().height ; i++)
-        {
-            setHeight.setCharacterSize(i);
-            contentText.setCharacterSize(i - 1);
-        }
-    }
-
-    void updateSprite(bool lineChanged)
-    {
-        sf::RenderTexture tempText;
-
-        tempText.create(textBoxSize.x, textBoxSize.y);
-
-        sf::Vector2f tempPos(contentText.getPosition());
-
         double x(0.0);
         double y(0.0);
 
+        sf::RenderTexture tempText;
+        sf::Vector2f tempPos(contentText.getPosition());
+
+        tempText.create(textBoxSize.x, textBoxSize.y);
         contentText.setString(returnValue());
 
         std::size_t cursorAbsolutePos(0);
@@ -1110,75 +1213,11 @@ public:
 
         cursorAbsolutePos += cursorPos;
 
-        if (cursorAbsolutePos < currentCursorBounds.x && !lineChanged)//We set the characters that will be displayed
-        {
-            if (cursorPos >= 1)
-                currentCursorBounds.x = cursorAbsolutePos - 1;
-            else
-                currentCursorBounds.x = cursorPos;
+        adaptHorizontalBounds(cursorAbsolutePos);
+        x = textHorizontalOffset;
 
-            currentCursorBounds.y = currentCursorBounds.x;
-            //We now need to set the upper bound
-
-            int numberOfCharacters(1);
-
-            for ( ; contentText.findCharacterPos(currentCursorBounds.x + numberOfCharacters).x - contentText.findCharacterPos(currentCursorBounds.x).x <= tempText.getSize().x
-                            && currentCursorBounds.x + numberOfCharacters < valueContained[currentLine].getSize() ; numberOfCharacters++)//While there are characters to treat
-            {
-                //contentText.setString(valueContained[currentLine].substr(currentCursorBounds.x, numberOfCharacters));
-                //currentCursorBounds.y = currentCursorBounds.x + numberOfCharacters;
-
-            }
-
-            currentCursorBounds.y = currentCursorBounds.x + numberOfCharacters;
-
-            renderFromLowerCursorBound = true;
-            //std::cout << "rekt" << "]";
-            //std::cout << "New bounds : [" << currentCursorBounds.x << ';' << currentCursorBounds.y << "]\n";
-        }
-        else if (((cursorAbsolutePos > currentCursorBounds.y || currentCursorBounds.y > valueContained[currentLine].getSize()) || lineChanged)
-                 && cursorAbsolutePos > 0)
-        {
-            std::size_t minimumLowerBound(0);
-
-            minimumLowerBound = cursorAbsolutePos - cursorPos;
-            currentCursorBounds.y = cursorAbsolutePos;
-            currentCursorBounds.x = currentCursorBounds.y;
-            //We now need to set the upper bound
-
-            int numberOfCharacters(1);
-
-            for ( ; contentText.findCharacterPos(currentCursorBounds.y).x - contentText.findCharacterPos(currentCursorBounds.y - numberOfCharacters).x <= tempText.getSize().x
-                            && currentCursorBounds.y - numberOfCharacters > minimumLowerBound ; numberOfCharacters++)//While there are characters to treat
-            {
-                //contentText.setString(valueContained[currentLine].substr(currentCursorBounds.y - numberOfCharacters, numberOfCharacters));
-                //currentCursorBounds.x = currentCursorBounds.y - numberOfCharacters;
-            }
-            currentCursorBounds.x = currentCursorBounds.y - numberOfCharacters;
-            //currentCursorBounds.x = currentCursorBounds.y - numberOfCharacters;
-            renderFromLowerCursorBound = false;
-            //std::cout << "New bounds : [" << currentCursorBounds.x << ';' << currentCursorBounds.y << "]\n";
-        }
-
-        if (contentText.getLocalBounds().height + contentText.getLocalBounds().top > tempText.getSize().y)
-            y = -(contentText.getLocalBounds().height + contentText.getLocalBounds().top) + tempText.getSize().y;
-        else
-            y = 0.0;
-
-        if (renderFromLowerCursorBound)
-        {
-
-            if (contentText.findCharacterPos(currentCursorBounds.y).x - contentText.findCharacterPos(currentCursorBounds.x).x > tempText.getSize().x)
-                x = -contentText.findCharacterPos(currentCursorBounds.x).x + contentText.findCharacterPos(0).x;
-        }
-        else
-        {
-            if (contentText.findCharacterPos(currentCursorBounds.y).x - contentText.findCharacterPos(currentCursorBounds.x).x > tempText.getSize().x)
-                x = -contentText.findCharacterPos(currentCursorBounds.y).x + tempText.getSize().x + contentText.findCharacterPos(0).x;
-        }
-
-        //std::cout << "Length : " << contentText.findCharacterPos(currentCursorBounds.y).x - contentText.findCharacterPos(currentCursorBounds.x).x << '\n';
-        //std::cout << "Bounds : ["<< currentCursorBounds.x <<';'<< currentCursorBounds.y <<"]\n";
+        adaptVerticalBounds(cursorAbsolutePos);
+        y = textVerticalOffset;
 
         this->contentText.setPosition(x,y);
 
@@ -1191,7 +1230,50 @@ public:
         textToDisplay.setTexture(*myTexture);
         textToDisplay.setPosition(background.getPosition().x + textRelPos.x, background.getPosition().y + textRelPos.y);
 
+        cursorMarker.setFillColor(contentText.getFillColor());
+        cursorMarker.setSize(sf::Vector2f(1,contentText.getFont()->getLineSpacing(contentText.getCharacterSize())));
+        cursorMarker.setPosition(sf::Vector2f(tempPos.x + textHorizontalOffset + contentText.findCharacterPos(cursorAbsolutePos).x - contentText.findCharacterPos(0).x
+                                              ,tempPos.y + textVerticalOffset + contentText.findCharacterPos(cursorAbsolutePos).y - contentText.findCharacterPos(0).y
+                                              ));
+
         this->contentText.setPosition(tempPos);
+    }
+
+    void adaptHorizontalBounds(std::size_t cursorAbsolutePos)
+    {
+        if (textHorizontalOffset + contentText.findCharacterPos(cursorAbsolutePos).x - contentText.findCharacterPos(0).x < 0)
+        {
+            while (textHorizontalOffset + contentText.findCharacterPos(cursorAbsolutePos).x - contentText.findCharacterPos(0).x < 0)
+                textHorizontalOffset++;
+
+            if (textHorizontalOffset > 0)
+                textHorizontalOffset = 0;
+        }
+        else if (textHorizontalOffset + contentText.findCharacterPos(cursorAbsolutePos).x - contentText.findCharacterPos(0).x > textBoxSize.x)
+        {
+            if (-contentText.getCharacterSize()*2 + textHorizontalOffset - contentText.findCharacterPos(0).x < -contentText.findCharacterPos(valueContained[currentLine].getSize()).x)
+                textHorizontalOffset = -contentText.findCharacterPos(valueContained[currentLine].getSize()).x;
+            else
+                while ((textHorizontalOffset + contentText.findCharacterPos(cursorAbsolutePos).x - contentText.findCharacterPos(0).x > textBoxSize.x))
+                    textHorizontalOffset--;
+        }
+    }
+
+    void adaptVerticalBounds(std::size_t cursorAbsolutePos)
+    {
+        if (textVerticalOffset + contentText.findCharacterPos(cursorAbsolutePos).y - contentText.findCharacterPos(0).y < 0)
+        {
+            while (textVerticalOffset + contentText.findCharacterPos(cursorAbsolutePos).y - contentText.findCharacterPos(0).y < 0)
+                textVerticalOffset ++;
+
+            if (textVerticalOffset > 0)
+                textVerticalOffset = 0;
+        }
+        else if (textVerticalOffset + contentText.findCharacterPos(cursorAbsolutePos).y - contentText.findCharacterPos(0).y + contentText.getFont()->getLineSpacing(contentText.getCharacterSize()) > textBoxSize.y)
+        {
+            while ((textVerticalOffset + contentText.findCharacterPos(cursorAbsolutePos).y - contentText.findCharacterPos(0).y + contentText.getFont()->getLineSpacing(contentText.getCharacterSize()) > textBoxSize.y))
+                textVerticalOffset--;
+        }
     }
 
     virtual void update(sf::RenderWindow& window)
@@ -1256,7 +1338,7 @@ public:
 
                     default:
 
-                        valueContained[currentLine].insert(/**valueContained[currentLine].begin()+*/cursorPos, Widget::unicodeBuffer[i]);
+                        valueContained[currentLine].insert(cursorPos, Widget::unicodeBuffer[i]);
                         cursorPos++;
                         break;
                     }
@@ -1316,21 +1398,20 @@ public:
 
             if (lettersCountBefore != lettersCountAfter || cursorPosBefore != cursorPos || currentLineBefore != currentLine)//Update the sprite
             {
-                updateSprite(!(currentLineBefore == currentLine));
+  //              if (currentLineBefore == currentLine)
+//                    currentLineBounds.y += lettersCountAfter - lettersCountBefore;
 
+                updateSprite();
 
-                /**std::cout << "Pos of the character is (" << contentText.findCharacterPos(cursorPos).x
-                << ';' << contentText.findCharacterPos(cursorPos).y << ")\n";*/
-                std::cout << "Number of lines now : "<< valueContained.size() <<'\n';
-                std::cout << "Number of characters now : " << lettersCountAfter << '\n';
             }
         }
     };
-    void Foo() {};
+
     virtual void draw(sf::RenderWindow& window) const
     {
         background.draw(window);
         window.draw(textToDisplay);
+        window.draw(cursorMarker);
     };
 
 private:
@@ -1338,10 +1419,8 @@ private:
     std::size_t currentLine;
     bool selected;
 
-    sf::Vector2u currentCursorBounds;//the .x of this is the lower bound, .y is the upper bound
-    bool renderFromLowerCursorBound;//If true, we render from the lower bound. Else, we render from the upper bound
-    sf::Vector2u currentLineBounds;//Exactly the same as the two above, but on a vertical axis (on y)
-    bool renderFromLowerLineBound;
+    int textHorizontalOffset;//number of pixels by which the text is pasted to the right
+    int textVerticalOffset;//same but on y-axis
 
     std::vector<sf::String> valueContained;
 
@@ -1350,6 +1429,7 @@ private:
     sf::Vector2f textRelPos;
     sf::Vector2f textBoxSize;
     sf::Sprite textToDisplay;
+    sf::RectangleShape cursorMarker;
 
     std::shared_ptr<sf::Texture> myTexture;
 

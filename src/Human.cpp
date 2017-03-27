@@ -260,7 +260,7 @@ void Human::drawHuman(sf::RenderTarget& window, int xWindow, int yWindow)
         std::stringstream idString;
         idString << "#" <<ID;
 
-        ImGui::Begin(idString.str().c_str());
+        /*ImGui::Begin(idString.str().c_str());
 
         ImGui::Text("Entity ID : %d", ID);
         ImGui::Text("Age : %d", age);
@@ -274,6 +274,6 @@ void Human::drawHuman(sf::RenderTarget& window, int xWindow, int yWindow)
 
 
 
-        ImGui::End();
+        ImGui::End();*/
     }
 }

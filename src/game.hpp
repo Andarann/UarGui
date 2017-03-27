@@ -6,9 +6,6 @@
 #include <vector>
 #include <cmath>
 
-#include "imgui.h"
-#include "imgui-sfml.h"
-
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/System/Clock.hpp>

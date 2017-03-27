@@ -1,8 +1,7 @@
 #ifndef HUMAN_HPP_INCLUDED
 #define HUMAN_HPP_INCLUDED
 
-#include "imgui.h"
-#include "imgui-sfml.h"
+
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
