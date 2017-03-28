@@ -26,17 +26,19 @@ void gameLoop()
         mainSystem.addHumanToSystem(Human(sf::Color(255,255,255), 50, 50, temp, mainSystem));
     }
 
-    InputValue<double> myInput;
-
     sf::Color myColor(255,0,0);
 
-    mainSystem.addWidget( InputValue<double>(sf::Vector2f(0,0), sf::Vector2f(500,500),"2.jpg", sf::Vector2f(0.0,0.1), sf::Vector2f(1.0,1.0), 120, 20.22, 1, 100) , "me");
-    InputValue<double> *me = mainSystem.giveWidgetPointer("me");
-    me->changeValue(57.21);
+
+
+    mainSystem.addWidget( InputString(sf::Vector2f(50,50), sf::Vector2f(100,100), "C:/Users/GUIGUI/Desktop/TeSFML/resources/window_background.png", sf::Vector2f(0,0), sf::Vector2f(1,1), 50), "Me");
+
+    InputString *me = mainSystem.giveWidgetPointer("Me");
 
     do
     {
         mainSystem.Update();
+
+        std::cout << me->returnValueAsUtf8() << '\n';
 
         mainSystem.Render();
 
@@ -66,13 +68,13 @@ void System::Update()
     windowMain.pollEvent(event);
 
     updateMouseButton();
-    //updateKeyboardButton();
-    //manageWindowEvent(event, windowMain, FPS);
+    updateKeyboardButton();
+    manageWindowEvent(event, windowMain, FPS);
 
     Widget::UpdateEvents(windowMain);
 
     updateWidgets();
-//    ImGui::SFML::Update(windowMain, imGuiClock.restart());
+
     Human::Update(allHumans, windowMain, *this);
 
     updateChunksList(windowMain);
@@ -666,24 +668,10 @@ void System::editMenu()
 
 void System::console()
 {
-    /*if (displayConsole)
+    if (displayConsole)
     {
-        ImGui::SetNextWindowSize(ImVec2(100, 20));
-        ImGui::Begin("Console");
 
-        char* tempText;
-
-        tempText = new char[consoleString.size()];
-
-        for (int i(0) ; i < consoleString.size() ; i++)
-            tempText[i] = consoleString[i];
-
-        ImGui::InputText("Enter text here", tempText, consoleString.size());
-
-        delete tempText;
-
-        ImGui::End();
-    }*/
+    }
 }
 
 void System::manageWindowEvent(sf::Event event, sf::RenderWindow& window, int FPS)
@@ -754,9 +742,6 @@ System::System() : windowMain(sf::VideoMode(INITIAL_WINDOW_WIDTH, INITIAL_WINDOW
     clockFPS.restart();
     numberOfFrames = 0;
     FPS = wishedFPS;
-
-    //We initialize the GUI system for this window
-//    ImGui::SFML::Init(windowMain);
 
     xUp = -100;
     yUp = -100;

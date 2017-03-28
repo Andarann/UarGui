@@ -13,6 +13,9 @@
 #include <SFML/Graphics.hpp>
 #include <typeinfo>
 #include <windows.h>
+#include <type_traits>
+
+#include "tinyxml2.h"
 
 /**
 Hello and welcome to this tutorial on how to use the basics of this GUI system
@@ -82,6 +85,9 @@ public:
     static void ignoreButtonMaintained(sf::Window const& mainWindow, sf::Mouse::Button toIgnore);
 
     static bool isWidgetContainer(Widget* toCheck);
+
+    virtual void loadFromXML(std::string filePath) = 0;
+    virtual void saveToXML(std::string filePath) = 0;
 
     virtual void update(sf::RenderWindow& window) = 0;
     virtual void draw(sf::RenderWindow& window) const = 0;
@@ -155,6 +161,9 @@ public:
     sf::FloatRect getLocalBounds() const;
     sf::FloatRect getGlobalBounds() const;
 
+    virtual void loadFromXML(std::string filePath) {};
+    virtual void saveToXML(std::string filePath) {};
+
     virtual void update(sf::RenderWindow& window);
     virtual void draw(sf::RenderWindow& window) const;
 private:
@@ -183,6 +192,9 @@ public:
     std::string getButtonString() const;
 
     bool isPressed() const {return (clicked || clickMaintained);};
+
+    virtual void loadFromXML(std::string filePath) {};
+    virtual void saveToXML(std::string filePath) {};
 
     virtual void update(sf::RenderWindow& window);
     virtual void draw(sf::RenderWindow& window) const;
@@ -220,6 +232,9 @@ class Slider : public Widget{
 public:
     Slider();
     ~Slider();
+
+    virtual void loadFromXML(std::string filePath) = 0;
+    virtual void saveToXML(std::string filePath) = 0;
 
     virtual void update(sf::RenderWindow& window);
     virtual void draw(sf::RenderWindow& window) const;
@@ -280,6 +295,9 @@ public:
     Widget* giveWidgetPointer(std::string widgetName) const;//Matches the name and the ID, to then get pointer from ID
     Widget* returnWidgetPointerOfID(ID_TYPE ID) const;//Not meant to be used directly. Matches ID and Widget*
 
+    virtual void loadFromXML(std::string filePath) {};
+    virtual void saveToXML(std::string filePath) {};
+
     virtual void update(sf::RenderWindow& window);
     virtual void draw(sf::RenderWindow& window) const;
 private:
@@ -298,17 +316,20 @@ A class in which you can input any value you want : int, double, float, std::str
 The required operators, however, are the >, <, =, <=, >= and == operators, for comparison matter.
 The << operator is also needed, otherwise the text will not be able to be displayed
 */
+
 template<class T>
 class InputValue : public Widget{
 public:
     //The default constructor of T will be used, no parameter sent
     InputValue() : background()
     {
+        isNumber();
+
         textVerticalOffset = 0;
         textHorizontalOffset = 0;
 
         limits = false;
-        aNumber = isNumber();
+        isSigned = isVariableSigned();
         selected = false;
 
         textRelPos = sf::Vector2f(0,0);
@@ -329,11 +350,13 @@ public:
 
     InputValue(T initValue) : background()
     {
+        isNumber();
+
         textVerticalOffset = 0;
         textHorizontalOffset = 0;
 
         limits = false;
-        aNumber = isNumber();
+        isSigned = isVariableSigned();
         selected = false;
 
         textRelPos = sf::Vector2f(0,0);
@@ -354,11 +377,13 @@ public:
 
     InputValue(T initValue, T minValue_, T maxValue_) : background()
     {
+        isNumber();
+
         textVerticalOffset = 0;
         textHorizontalOffset = 0;
 
         limits = true;
-        aNumber = isNumber();
+        isSigned = isVariableSigned();
         selected = false;
 
         minValue = minValue_;
@@ -383,11 +408,13 @@ public:
     InputValue(sf::Vector2f pos, sf::Vector2f size, sf::Color color, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize)//The default constructor of T will be used, no parameter sent
         : background(color, size, pos)
     {
+        isNumber();
+
         textVerticalOffset = 0;
         textHorizontalOffset = 0;
 
         limits = false;
-        aNumber = isNumber();
+        isSigned = isVariableSigned();
         selected = false;
 
         textRelPos = sf::Vector2f(pos.x * relativeTextPosPer_.x, pos.y * relativeTextPosPer_.y);
@@ -415,11 +442,13 @@ public:
     InputValue(sf::Vector2f pos, sf::Vector2f size, sf::Color color, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, T initValue)
             : background(color, size, pos)
     {
+        isNumber();
+
         textVerticalOffset = 0;
         textHorizontalOffset = 0;
 
         limits = false;
-        aNumber = isNumber();
+        isSigned = isVariableSigned();
         selected = false;
 
         textRelPos = sf::Vector2f(pos.x * relativeTextPosPer_.x, pos.y * relativeTextPosPer_.y);
@@ -447,11 +476,13 @@ public:
     InputValue(sf::Vector2f pos, sf::Vector2f size, sf::Color color, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, T initValue, T minValue_, T maxValue_)
             : background(color, size, pos)
     {
+        isNumber();
+
         textVerticalOffset = 0;
         textHorizontalOffset = 0;
 
         limits = true;
-        aNumber = isNumber();
+        isSigned = isVariableSigned();
         selected = false;
 
         minValue = minValue_;
@@ -482,11 +513,13 @@ public:
     InputValue(sf::Vector2f pos, sf::Vector2f size, std::string texturePath, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize)//The default constructor of T will be used, no parameter sent
             : background(texturePath, size, pos)
     {
+        isNumber();
+
         textVerticalOffset = 0;
         textHorizontalOffset = 0;
 
         limits = false;
-        aNumber = isNumber();
+        isSigned = isVariableSigned();
         selected = false;
 
         textRelPos = sf::Vector2f(pos.x * relativeTextPosPer_.x, pos.y * relativeTextPosPer_.y);
@@ -514,11 +547,13 @@ public:
     InputValue(sf::Vector2f pos, sf::Vector2f size, std::string texturePath, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, T initValue)
             : background(texturePath, size, pos)
     {
+        isNumber();
+
         textVerticalOffset = 0;
         textHorizontalOffset = 0;
 
         limits = false;
-        aNumber = isNumber();
+        isSigned = isVariableSigned();
         selected = false;
 
         textRelPos = sf::Vector2f(pos.x * relativeTextPosPer_.x, pos.y * relativeTextPosPer_.y);
@@ -546,11 +581,13 @@ public:
     InputValue(sf::Vector2f pos, sf::Vector2f size, std::string texturePath, sf::Vector2f relativeTextPosPer_, sf::Vector2f textBoxSizePer_, unsigned int characterSize, T initValue, T minValue_, T maxValue_)
             : background(texturePath, size, pos)
     {
+        isNumber();
+
         textVerticalOffset = 0;
         textHorizontalOffset = 0;
 
         limits = true;
-        aNumber = isNumber();
+        isSigned = isVariableSigned();
         selected = false;
 
         minValue = minValue_;
@@ -627,7 +664,22 @@ public:
         T before(testType);
         myStream << "a";
         myStream >> testType;
+
+        if (testType != before)
+        {
+            std::stringstream errorStream;
+            errorStream << "Error : InputValue not meant to be used with variable of type "
+                        << typeid(T).name()
+                        << ". You want to use the InputString class for any non-numeric input.\n";
+            std::cerr << errorStream.str() << '\n';
+            throw errorStream.str().c_str();
+        }
         return (testType == before);
+    }
+
+    bool isVariableSigned() const
+    {
+        return (T(-1) < 0);
     }
 
     void updateSprite()
@@ -712,29 +764,36 @@ public:
     {
         T currentValue = returnValue();
 
-        if (!limits)
+        if (currentValue != T())
         {
-            if (currentValue > std::numeric_limits<T>::max() - 1)
+            if (!limits)
             {
-                changeValue(std::numeric_limits<T>::max());
+                if (currentValue > std::numeric_limits<T>::max() - 1)
+                {
+                    changeValue(std::numeric_limits<T>::max());
+                }
+                else if (currentValue < std::numeric_limits<T>::min() + 1)
+                {
+                    changeValue(std::numeric_limits<T>::min());
+                }
             }
-            else if (currentValue < std::numeric_limits<T>::min() + 1)
+            else
             {
-                changeValue(std::numeric_limits<T>::min());
-            }
-        }
-        else
-        {
-            if (currentValue > maxValue  - 1)
-            {
-                changeValue(maxValue);
-            }
-            else if (currentValue < minValue + 1)
-            {
-                changeValue(minValue);
+
+                if (currentValue > maxValue  - 1)
+                {
+                    changeValue(maxValue);
+                }
+                else if (currentValue < minValue + 1)
+                {
+                    changeValue(minValue);
+                }
             }
         }
     }
+
+    virtual void loadFromXML(std::string filePath) {};
+    virtual void saveToXML(std::string filePath) {};
 
     virtual void update(sf::RenderWindow& window)
     {
@@ -759,7 +818,6 @@ public:
 
                 for (int i(0) ; i < Widget::unicodeBuffer.size() ; i++)
                 {
-                    //std::cout << Widget::unicodeBuffer[i] << '\n';
                     switch (Widget::unicodeBuffer[i])
                     {
                     case 8://Delete
@@ -772,35 +830,31 @@ public:
                         break;
 
 
-                    case 13://Enter
+                    /*case 13://Enter
 
                         if (!aNumber)
                             valueContained += '\n';
 
-                        break;
+                        break;*/
 
                     case 45://Minus
 
-                        if (aNumber && cursorPos == 0)
+                        if (isSigned && cursorPos == 0 && minValue < 0)
                         {
                             minValue;
                             if (valueContained.find((char)45) == std::string::npos)
                                 valueContained.insert(valueContained.begin() + cursorPos, (char)Widget::unicodeBuffer[i]);
                         }
-                        else
-                            valueContained.insert(valueContained.begin() + cursorPos, (char)Widget::unicodeBuffer[i]);
 
                         break;
 
                     case 46://Comma
 
-                        if (aNumber)
-                        {
-                            if (valueContained.find((char)46) == std::string::npos)
-                                valueContained.insert(valueContained.begin() + cursorPos, (char)Widget::unicodeBuffer[i]);
-                        }
-                        else
+
+                        if (valueContained.find((char)46) == std::string::npos)//To be sure that there is at most one comma
                             valueContained.insert(valueContained.begin() + cursorPos, (char)Widget::unicodeBuffer[i]);
+
+
 
                         break;
 
@@ -815,12 +869,6 @@ public:
                     case 56:
                     case 57://Numbers
                         valueContained.insert(valueContained.begin() + cursorPos, (char)Widget::unicodeBuffer[i]);
-                        break;
-                    default:
-
-                        if (!aNumber)
-                            valueContained.insert(valueContained.begin() + cursorPos, (char)Widget::unicodeBuffer[i]);
-
                         break;
                     }
                 }
@@ -873,16 +921,17 @@ public:
 
             if (valueContained != beforeModifText || cursorPosBefore != cursorPos || currentLineBefore != currentLine)//Update the sprite
             {
-                if (aNumber && returnValue() != T())//If its a non-empty number
-                {
-                    putValueBetweenLimits();
-                }
+
+                std::string valueBefore(valueContained);
+
+                putValueBetweenLimits();
+
+                if (valueBefore != valueContained && valueContained != beforeModifText)
+                    valueContained = beforeModifText;
 
                 cursorPos += valueContained.size() - beforeModifText.size();
 
                 updateSprite();
-
-                std::cout << this->returnValue() + 3 << '\n';
             }
         }
     };
@@ -891,7 +940,9 @@ public:
     {
         background.draw(window);
         window.draw(textToDisplay);
-        window.draw(cursorMarker);
+
+        if (selected)
+            window.draw(cursorMarker);
     };
 
 private:
@@ -900,7 +951,8 @@ private:
     bool selected;
 
     bool limits;
-    bool aNumber;
+    bool isSigned;
+    bool isDecimal;
 
     T minValue, maxValue;
     T currentValue;
@@ -921,6 +973,19 @@ private:
     int textHorizontalOffset;//number of pixels by which the text is pasted to the right
     int textVerticalOffset;//same but on y-axis
 };
+
+typedef InputValue<signed int> InputSignedInt;
+typedef InputValue<int> InputInt;
+typedef InputValue<unsigned int> InputUnsignedInt;
+typedef InputValue<signed short> InputSignedShort;
+typedef InputValue<short> InputShort;
+typedef InputValue<unsigned short> InputUnsignedShort;
+typedef InputValue<signed long> InputSignedLong;
+typedef InputValue<long> InputLong;
+typedef InputValue<unsigned long> InputUnsignedLong;
+typedef InputValue<signed long long> InputSignedLongLong;
+typedef InputValue<long long> InputLongLong;
+typedef InputValue<unsigned long long> InputUnsignedLongLong;
 
 class InputString : public Widget{
 public:
@@ -1162,6 +1227,45 @@ public:
         return toReturn;
     };
 
+    std::string returnValueAsUtf8() const
+    {
+        sf::String toReturn;
+
+        for (int i(0) ; i < valueContained.size() ; i++)
+        {
+            toReturn += valueContained[i];
+            toReturn += '\n';
+        }
+
+        return toReturn.toAnsiString();
+    };
+
+    std::basic_string<short unsigned int> returnValueAsUtf16() const
+    {
+        sf::String toReturn;
+
+        for (int i(0) ; i < valueContained.size() ; i++)
+        {
+            toReturn += valueContained[i];
+            toReturn += '\n';
+        }
+
+        return toReturn.toUtf16();
+    };
+
+    sf::String returnValueAsUtf32() const
+    {
+        sf::String toReturn;
+
+        for (int i(0) ; i < valueContained.size() ; i++)
+        {
+            toReturn += valueContained[i];
+            toReturn += '\n';
+        }
+
+        return toReturn.toUtf32();
+    };
+
     bool loadFont(std::string fontToLoad)
     {
         fontID = Widget::giveFontID(fontToLoad);
@@ -1275,6 +1379,9 @@ public:
                 textVerticalOffset--;
         }
     }
+
+    virtual void loadFromXML(std::string filePath) {};
+    virtual void saveToXML(std::string filePath) {};
 
     virtual void update(sf::RenderWindow& window)
     {
@@ -1411,7 +1518,9 @@ public:
     {
         background.draw(window);
         window.draw(textToDisplay);
-        window.draw(cursorMarker);
+
+        if (selected)
+            window.draw(cursorMarker);
     };
 
 private:
